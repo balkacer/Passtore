@@ -6,8 +6,9 @@ services:
       POSTGRES_USER: passtore
       POSTGRES_PASSWORD: passtore
       POSTGRES_DB: passtore
+    # Host port configurable if 5432 is already taken (e.g. another Postgres)
     ports:
-      - '5432:5432'
+      - '${POSTGRES_HOST_PORT:-5433}:5432'
     volumes:
       - passtore_pg:/var/lib/postgresql/data
     healthcheck:
@@ -45,11 +46,11 @@ services:
 
   web:
     build:
-      context: ./apps/web
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/web/Dockerfile
     container_name: passtore-web
     ports:
-      - '8080:80'
+      - '${WEB_HOST_PORT:-8081}:80'
     depends_on:
       - backend
 

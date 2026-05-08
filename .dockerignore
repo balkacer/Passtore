@@ -1,0 +1,21 @@
+# Reduce build context (avoid Windows "invalid file request" on huge trees)
+**/node_modules
+**/dist
+.git
+**/.git
+coverage
+.env
+.env.*
+*.local
+
+# Apps not needed for web image
+apps/mobile
+apps/desktop-tauri
+apps/cli
+apps/extension-chromium
+apps/extension-safari
+
+# Backend built from its own context
+backend
+
+docs
