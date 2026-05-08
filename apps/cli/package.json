@@ -1,0 +1,35 @@
+{
+  "name": "@passtore/cli",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Passtore CLI — TUI Ink, cofre, sync, dispositivos",
+  "type": "module",
+  "bin": {
+    "passtore": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@passtore/core": "file:../../packages/core",
+    "@passtore/crypto-contract": "file:../../packages/crypto-contract",
+    "@passtore/vault-crypto": "file:../../packages/vault-crypto",
+    "crypto-js": "^4.2.0",
+    "ink": "^5.2.1",
+    "ink-select-input": "^6.2.0",
+    "ink-spinner": "^5.0.0",
+    "ink-text-input": "^6.0.0",
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
+    "vitest": "3.2.4",
+    "@types/node": "^22.10.0",
+    "@types/react": "^18.3.28",
+    "typescript": "~5.6.3"
+  },
+  "license": "UNLICENSED"
+}

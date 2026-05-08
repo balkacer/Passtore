@@ -1,0 +1,15 @@
+{
+  "name": "passtore-desktop",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Passtore escritorio — shell Tauri sobre apps/web",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "icon": "tauri icon ../web/public/icons/pwa-icon.svg"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.11.1"
+  }
+}

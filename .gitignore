@@ -1,0 +1,108 @@
+# --- Dependencies ---
+node_modules/
+
+# --- Build outputs ---
+dist/
+build/
+out/
+.next/
+.turbo/
+*.tsbuildinfo
+
+# --- Environment & local secrets (keep *.example committed) ---
+.env
+.env.*
+!**/.env.example
+!**/.env.*.example
+
+# --- Logs ---
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# --- Tests & coverage ---
+coverage/
+.nyc_output/
+*.lcov
+.vitest/
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# --- Editors / IDE ---
+.idea/
+*.iml
+*.sw?
+*.swo
+*.sublime-*
+
+# --- Rust (Tauri, native tooling) ---
+**/target/
+
+# --- Tauri generated ---
+**/src-tauri/gen/
+
+# --- React Native / Metro ---
+.metro-health-check*
+*.jsbundle
+*.hprof
+.cxx/
+
+# --- Gradle (Android) ---
+.gradle/
+
+# --- Android ---
+*.apk
+*.aab
+*.keystore
+!**/debug.keystore
+local.properties
+
+# --- iOS / CocoaPods ---
+**/Pods/
+DerivedData/
+*.ipa
+xcuserdata/
+*.xcuserstate
+**/.xcode.env.local
+
+# --- Caches ---
+.cache/
+.parcel-cache/
+.eslintcache
+*.tsbuildinfo
+
+# --- Certificates & keys (never commit) ---
+*.pem
+*.p12
+id_rsa
+id_rsa.pub
+*.mobileprovision
+
+# --- E2E / Maestro / Playwright ---
+.maestro/
+test-results/
+playwright-report/
+blob-report/
+
+# --- Misc ---
+tmp/
+temp/
+*.tmp
+*.orig
+
+# --- Yarn (berry) — keep releases/plugins if you use zero-installs ---
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

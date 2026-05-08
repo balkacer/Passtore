@@ -1,0 +1,39 @@
+{
+  "name": "passtore-monorepo",
+  "private": true,
+  "description": "Passtore — local-first password manager monorepo",
+  "scripts": {
+    "core:typecheck": "npm run typecheck --prefix packages/core",
+    "cli:build": "npm run build --prefix apps/cli",
+    "test:crypto-contract": "npm run test --prefix apps/web -- src/tests/unit/lib/encryption.contract.test.ts && npm run test --prefix apps/mobile -- src/tests/unit/encryption.contract.test.ts && npm run test --prefix apps/cli -- src/tests/unit/encryption.contract.test.ts && npm run test --prefix packages/crypto-contract",
+    "test:packages": "npm run test --prefix packages/crypto-contract",
+    "test:unit": "npm run test --prefix apps/web && npm run test:unit --prefix apps/mobile && npm run test --prefix apps/cli && npm run test --prefix backend && npm run test:packages",
+    "test:e2e": "npm run test:e2e --prefix backend",
+    "test:e2e:mobile": "npm run e2e:maestro:android --prefix apps/mobile",
+    "test:mobile": "npm test --prefix apps/mobile",
+    "test:all": "npm run test:unit && npm run test:e2e && npm run test:integration --prefix apps/mobile",
+    "passtore": "node apps/cli/dist/cli.js",
+    "docker:up": "docker compose up -d",
+    "docker:up:build": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:down:volumes": "docker compose down -v",
+    "docker:logs": "docker compose logs -f",
+    "docker:ps": "docker compose ps",
+    "docker:restart": "docker compose restart",
+    "local:db": "docker compose up -d postgres",
+    "local:backend": "npm run start:dev --prefix backend",
+    "local:web": "npm run dev --prefix apps/web",
+    "local:mobile": "npm run start --prefix apps/mobile",
+    "local:stack": "concurrently -k -n api,web -c cyan,magenta \"npm run start:dev --prefix backend\" \"npm run dev --prefix apps/web\"",
+    "local:dev": "npm run local:stack",
+    "extension:pack": "powershell -NoProfile -ExecutionPolicy Bypass -File apps/extension-chromium/scripts/pack.ps1",
+    "extension:pack:firefox": "powershell -NoProfile -ExecutionPolicy Bypass -File apps/extension-chromium/scripts/pack-firefox.ps1",
+    "extension:stage:firefox": "powershell -NoProfile -ExecutionPolicy Bypass -File apps/extension-chromium/scripts/stage-firefox-unpacked.ps1",
+    "extension:safari:packager": "powershell -NoProfile -ExecutionPolicy Bypass -File apps/extension-safari/scripts/packager.ps1",
+    "desktop:dev": "npm run dev --prefix apps/desktop-tauri",
+    "desktop:build": "npm run build --prefix apps/desktop-tauri"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

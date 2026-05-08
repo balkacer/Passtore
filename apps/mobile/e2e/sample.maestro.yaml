@@ -1,0 +1,5 @@
+# Ejemplo Maestro — asigna accessibilityLabel en botones para estabilizar selectores.
+appId: com.passtoremobile  # Ajusta al bundle ID real en Xcode / Android
+---
+- launchApp
+- assertVisible: "Passtore"

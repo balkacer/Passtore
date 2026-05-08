@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Passtore</string>
+    <string name="autofill_service_name">Passtore Autofill</string>
+</resources>

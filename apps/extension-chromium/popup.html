@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Passtore</title>
+    <style>
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        margin: 0;
+        padding: 12px;
+        min-width: 300px;
+        max-width: 380px;
+        font-size: 13px;
+        color: #1f1416;
+        background: #fdf2f3;
+      }
+      h2 {
+        margin: 14px 0 6px;
+        font-size: 0.95rem;
+      }
+      label {
+        display: block;
+        margin-bottom: 6px;
+      }
+      label span {
+        display: block;
+        font-size: 0.78rem;
+        color: #6b4c52;
+        margin-bottom: 2px;
+      }
+      input,
+      select {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 6px 8px;
+        border-radius: 8px;
+        border: 1px solid rgba(127, 29, 29, 0.25);
+        font: inherit;
+      }
+      button {
+        display: block;
+        width: 100%;
+        margin-bottom: 8px;
+        padding: 8px 10px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        background: #7f1d1d;
+        color: #fff;
+      }
+      button.secondary {
+        background: #fff;
+        color: #7f1d1d;
+        border: 1px solid rgba(127, 29, 29, 0.35);
+      }
+      button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+      .row2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      pre {
+        margin: 8px 0 0;
+        padding: 8px;
+        background: #fff;
+        border-radius: 8px;
+        font-size: 11px;
+        word-break: break-all;
+        white-space: pre-wrap;
+        max-height: 88px;
+        overflow: auto;
+      }
+      .muted {
+        color: #6b4c52;
+        margin: 0 0 8px;
+        line-height: 1.35;
+        font-size: 0.85rem;
+      }
+      .pill {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      .pill.ok {
+        background: rgba(34, 197, 94, 0.2);
+        color: #166534;
+      }
+      .pill.warn {
+        background: rgba(234, 179, 8, 0.25);
+        color: #854d0e;
+      }
+      details {
+        margin-top: 12px;
+        font-size: 0.85rem;
+      }
+      summary {
+        cursor: pointer;
+        color: #7f1d1d;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="jwt-pill" class="pill warn">JWT temporal: …</div>
+
+    <h2>API</h2>
+    <p class="muted">
+      URL base del backend Nest (sin <code>/api</code>). Ej. <code>http://localhost:3000</code>
+    </p>
+    <label>
+      <span>Base URL</span>
+      <input type="url" id="api-base-url" autocomplete="off" />
+    </label>
+    <button type="button" class="secondary" id="btn-save-api">Guardar</button>
+
+    <h2>Emparejamiento temporal</h2>
+    <p class="muted">
+      Tras iniciar, copia el deep link o el JSON para la app. El poll guarda el JWT en la extensión.
+    </p>
+    <label>
+      <span>Nombre del cliente</span>
+      <input type="text" id="device-name" value="Passtore extension" />
+    </label>
+    <label>
+      <span>Origen permitido</span>
+      <input type="text" id="allowed-origin" placeholder="https://ejemplo.com" />
+    </label>
+    <label>
+      <span>Contexto</span>
+      <select id="context-type">
+        <option value="extension">extension</option>
+        <option value="browser">browser</option>
+        <option value="web">web</option>
+        <option value="autofill">autofill</option>
+        <option value="desktop">desktop</option>
+      </select>
+    </label>
+    <button type="button" id="btn-init-pairing">Iniciar emparejamiento</button>
+    <div class="row2">
+      <button type="button" class="secondary" id="btn-copy-deeplink" disabled>
+        Copiar deep link
+      </button>
+      <button type="button" class="secondary" id="btn-copy-qr" disabled>
+        Copiar qrPayload
+      </button>
+    </div>
+    <button type="button" class="secondary" id="btn-clear-jwt">Olvidar JWT temporal</button>
+
+    <h2>Autofill (sesión temporal)</h2>
+    <p class="muted">
+      UUID de credencial en tu cuenta. Solo se rellena el <strong>usuario</strong> en
+      texto plano; la contraseña sigue cifrada en el servidor (sin clave de cofre en
+      la extensión).
+    </p>
+    <label>
+      <span>credentialId</span>
+      <input
+        type="text"
+        id="credential-id"
+        placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+        spellcheck="false"
+        autocomplete="off"
+      />
+    </label>
+    <label>
+      <span>Propósito</span>
+      <select id="deliver-purpose">
+        <option value="autofill">autofill (directo si la política lo permite)</option>
+        <option value="copy">copy (suele pedir aprobación)</option>
+        <option value="reveal">reveal (suele pedir aprobación)</option>
+      </select>
+    </label>
+    <button type="button" id="btn-autofill">
+      Rellenar usuario en la pestaña actual
+    </button>
+    <button type="button" class="secondary" id="btn-copy-approval" disabled>
+      Copiar enlace de aprobación
+    </button>
+    <pre id="autofill-status"></pre>
+
+    <h2 style="margin-top: 1rem">Estado del emparejamiento</h2>
+    <pre id="poll-status">Sin poll activo.</pre>
+
+    <details>
+      <summary>Bridge de prueba</summary>
+      <p class="muted">Comprobación PING / content script.</p>
+      <button type="button" id="ping-bg">Ping background</button>
+      <button type="button" class="secondary" id="ping-tab">
+        Ping content script (pestaña)
+      </button>
+      <pre id="bridge-out"></pre>
+    </details>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

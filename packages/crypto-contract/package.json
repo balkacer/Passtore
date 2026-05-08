@@ -1,0 +1,19 @@
+{
+  "name": "@passtore/crypto-contract",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Golden vectors for vault AES (CryptoJS) interoperability across Passtore apps",
+  "scripts": {
+    "test": "vitest run --config vitest.config.ts"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "devDependencies": {
+    "typescript": "~5.6.3",
+    "vitest": "3.2.4"
+  },
+  "license": "UNLICENSED"
+}

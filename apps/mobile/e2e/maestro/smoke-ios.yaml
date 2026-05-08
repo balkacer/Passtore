@@ -1,0 +1,8 @@
+# Same smoke as smoke-android.yaml for iOS Simulator / device.
+# Bundle id must match Xcode (default RN template uses product name suffix).
+
+appId: org.reactjs.native.example.PasstoreMobile
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Passtore"

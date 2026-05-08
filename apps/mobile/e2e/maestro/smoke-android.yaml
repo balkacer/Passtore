@@ -1,0 +1,9 @@
+# Smoke: app launches and welcome branding is visible (logged-out path).
+# Requires: release/debug build on emulator/device. Install Maestro: https://maestro.mobile.dev
+# Run from repo root: cd mobile && maestro test e2e/maestro/smoke-android.yaml
+
+appId: com.passtoremobile
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Passtore"

@@ -1,0 +1,19 @@
+{
+  "name": "@passtore/vault-crypto",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Shared vault AES (CryptoJS) for Passtore apps — encrypt/decrypt + key material",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@babel/runtime": "^7.26.0",
+    "crypto-js": "^4.2.0"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.2.2"
+  },
+  "license": "UNLICENSED"
+}

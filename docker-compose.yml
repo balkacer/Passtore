@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: passtore-db
+    environment:
+      POSTGRES_USER: passtore
+      POSTGRES_PASSWORD: passtore
+      POSTGRES_DB: passtore
+    ports:
+      - '5432:5432'
+    volumes:
+      - passtore_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U passtore -d passtore']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: passtore-api
+    ports:
+      - '3000:3000'
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      DATABASE_SYNC: 'true'
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: passtore
+      DATABASE_PASSWORD: passtore
+      DATABASE_NAME: passtore
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production-use-long-random-string}
+      JWT_EXPIRES_IN: 7d
+      # Web SPA (compose `web` on :80), Vite dev, physical devices — adjust as needed
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost,http://localhost:8080,http://127.0.0.1,http://localhost:5173}
+      WEBAUTHN_RP_ID: ${WEBAUTHN_RP_ID:-localhost}
+      WEBAUTHN_RP_NAME: ${WEBAUTHN_RP_NAME:-Passtore}
+      WEBAUTHN_ORIGINS: ${WEBAUTHN_ORIGINS:-http://localhost:8080,http://localhost,http://127.0.0.1,http://localhost:5173}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: passtore-web
+    ports:
+      - '8080:80'
+    depends_on:
+      - backend
+
+volumes:
+  passtore_pg:
