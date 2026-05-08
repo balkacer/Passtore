@@ -86,6 +86,9 @@ jobs:
           npm ci --prefix apps/web
           npm ci --prefix apps/desktop-tauri
 
+      - name: Verify vault-crypto install (tsc reads deps next to package source)
+        run: node -e "const fs=require('fs'); const p='packages/vault-crypto/node_modules/crypto-js/package.json'; if(!fs.existsSync(p)){console.error('missing',p); process.exit(1)} console.log('OK',p)"
+
       - name: Build Tauri bundle
         working-directory: apps/desktop-tauri
         run: npm run build

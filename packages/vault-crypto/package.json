@@ -10,10 +10,8 @@
   "types": "./src/index.ts",
   "dependencies": {
     "@babel/runtime": "^7.26.0",
+    "@types/crypto-js": "^4.2.2",
     "crypto-js": "^4.2.0"
-  },
-  "devDependencies": {
-    "@types/crypto-js": "^4.2.2"
   },
   "license": "UNLICENSED"
 }
