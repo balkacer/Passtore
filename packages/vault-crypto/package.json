@@ -4,14 +4,28 @@
   "private": true,
   "type": "module",
   "description": "Shared vault AES (CryptoJS) for Passtore apps — encrypt/decrypt + key material",
+  "main": "./dist/index.js",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
   },
-  "types": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node ./scripts/run-tsc.mjs"
+  },
   "dependencies": {
     "@babel/runtime": "^7.26.0",
     "@types/crypto-js": "^4.2.2",
     "crypto-js": "^4.2.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.6.3"
   },
   "license": "UNLICENSED"
 }

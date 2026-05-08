@@ -79,15 +79,11 @@ jobs:
         with:
           workspaces: apps/desktop-tauri/src-tauri
 
-      # vault-crypto exports TS source; tsc resolves crypto-js from packages/vault-crypto/node_modules
-      - name: Install npm dependencies (packages + web + desktop)
+      # Web `npm run build` compiles @passtore/vault-crypto to dist/ then tsc + Vite (see apps/web/package.json).
+      - name: Install npm dependencies (web + desktop)
         run: |
-          npm ci --prefix packages/vault-crypto
           npm ci --prefix apps/web
           npm ci --prefix apps/desktop-tauri
-
-      - name: Verify vault-crypto install (tsc reads deps next to package source)
-        run: node -e "const fs=require('fs'); const p='packages/vault-crypto/node_modules/crypto-js/package.json'; if(!fs.existsSync(p)){console.error('missing',p); process.exit(1)} console.log('OK',p)"
 
       - name: Build Tauri bundle
         working-directory: apps/desktop-tauri

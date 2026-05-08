@@ -14,6 +14,8 @@ export default defineConfig({
         dir,
         '../../packages/crypto-contract/src/index.ts',
       ),
+      // vault-crypto builds to dist/ with `import ... from 'crypto-js'`; Rollup resolves from web root.
+      'crypto-js': path.resolve(dir, 'node_modules/crypto-js'),
     },
   },
   server: {
