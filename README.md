@@ -58,7 +58,7 @@ Passtore/
 - `src/screens/` — onboarding, auth, home, vault, notificaciones.
 - `src/features/password-generator/` — componente reutilizable del generador.
 - `src/services/` — API RTK (en `store/rtk`), `encryptionService` (reexport de `@passtore/vault-crypto`), `secureStorageService`, **vault SQLite** (`services/vault/`, `react-native-quick-sqlite`), biometría, favicon, placeholders autofill.
-- **Vault local:** con `USE_LOCAL_VAULT` en `true` (por defecto en `__DEV__` en `apps/mobile/src/config/featureFlags.ts`), las credenciales se guardan solo en SQLite en el dispositivo; en release sigue la API hasta activar sync. Contrato: `apps/mobile/docs/VAULT_CLIENT_SERVICES.md`. Tras `npm install`, en iOS ejecuta `pod install` en `apps/mobile/ios` para enlazar SQLite nativo.
+- **Vault local:** en `__DEV__` (o en release con variables `PASSTORE_*` al compilar; ver sección en `apps/mobile/README.md`), las credenciales se guardan en SQLite; la API recibe eventos opacos por `/sync/events`. Contrato: `apps/mobile/docs/VAULT_CLIENT_SERVICES.md`. Tras `npm install`, en iOS ejecuta `pod install` en `apps/mobile/ios` para enlazar SQLite nativo.
 - `src/store/rtk/` — `passtoreApi` + `store`.
 - `src/store/zustand/` — sesión (`authStore`).
 - `src/tests/unit/` — tests Jest (unitarios); `src/tests/integration/` — smokes (p. ej. render de `App`). Setup en `src/tests/setup.ts`. Ver [docs/TESTING.md](./docs/TESTING.md).
@@ -72,6 +72,7 @@ Passtore/
 - JWT en `sessionStorage`; clave de bóveda en `localStorage` (riesgo XSS inherente a cualquier SPA — usar solo HTTPS en producción).
 - Desarrollo: `Vite` hace **proxy** de `/api` → `http://localhost:3000` (ver `apps/web/vite.config.ts`).
 - Producción: define `VITE_API_BASE_URL` apuntando al host público del backend y habilita **CORS** para ese origen.
+- **Cofre local-first (opcional en prod):** con `VITE_USE_LOCAL_VAULT=true` en `.env` antes de `npm run build`, las credenciales dejan de ir a `GET/POST /credentials` y pasan a IndexedDB + cola `/sync/events` (igual que en `npm run dev`). Botón **Sincronizar** en Home. Detalle en `apps/web/.env.example`.
 - **Importante:** el **formato** del ciphertext es el mismo en todos los clientes (`@passtore/vault-crypto`). Aun así, la **clave de bóveda** suele ser distinta por dispositivo/navegador hasta que exista un flujo de desbloqueo o sync que reparta la misma clave; sin eso, el ciphertext almacenado en un cliente no es descifrable en otro aunque la app sea la misma.
 
 #### CORS y WebAuthn por entorno (referencia rápida)
