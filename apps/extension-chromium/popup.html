@@ -90,7 +90,8 @@
         border-radius: 999px;
         font-size: 0.72rem;
         font-weight: 600;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
+        margin-right: 6px;
       }
       .pill.ok {
         background: rgba(34, 197, 94, 0.2);
@@ -112,9 +113,31 @@
     </style>
   </head>
   <body>
-    <div id="jwt-pill" class="pill warn">JWT temporal: …</div>
+    <div style="margin-bottom: 6px">
+      <span id="pill-web" class="pill warn">Web: …</span>
+      <span id="pill-temp" class="pill warn">Temporal: …</span>
+    </div>
 
-    <h2>API</h2>
+    <h2>Sesión desde la web</h2>
+    <p class="muted">
+      Si ya iniciaste sesión en la app Passtore en una pestaña del mismo navegador,
+      sincroniza para usar esa cuenta en la extensión. Si no, abre el inicio de sesión
+      en la web y vuelve aquí.
+    </p>
+    <label>
+      <span>URL de la app web (origen)</span>
+      <input type="url" id="web-app-url" autocomplete="off" placeholder="http://localhost:5173" />
+    </label>
+    <button type="button" class="secondary" id="btn-save-web-app">Guardar URL web</button>
+    <button type="button" id="btn-sync-web">Sincronizar sesión desde la web</button>
+    <button type="button" class="secondary" id="btn-open-web-login">
+      Iniciar sesión o registrarse en la web…
+    </button>
+    <button type="button" class="secondary" id="btn-clear-user-jwt">
+      Cerrar sesión en la extensión (borrar token web)
+    </button>
+
+    <h2>API (backend)</h2>
     <p class="muted">
       URL base del backend Nest (sin <code>/api</code>). Ej. <code>http://localhost:3000</code>
     </p>
@@ -124,44 +147,10 @@
     </label>
     <button type="button" class="secondary" id="btn-save-api">Guardar</button>
 
-    <h2>Emparejamiento temporal</h2>
+    <h2>Autofill</h2>
     <p class="muted">
-      Tras iniciar, copia el deep link o el JSON para la app. El poll guarda el JWT en la extensión.
-    </p>
-    <label>
-      <span>Nombre del cliente</span>
-      <input type="text" id="device-name" value="Passtore extension" />
-    </label>
-    <label>
-      <span>Origen permitido</span>
-      <input type="text" id="allowed-origin" placeholder="https://ejemplo.com" />
-    </label>
-    <label>
-      <span>Contexto</span>
-      <select id="context-type">
-        <option value="extension">extension</option>
-        <option value="browser">browser</option>
-        <option value="web">web</option>
-        <option value="autofill">autofill</option>
-        <option value="desktop">desktop</option>
-      </select>
-    </label>
-    <button type="button" id="btn-init-pairing">Iniciar emparejamiento</button>
-    <div class="row2">
-      <button type="button" class="secondary" id="btn-copy-deeplink" disabled>
-        Copiar deep link
-      </button>
-      <button type="button" class="secondary" id="btn-copy-qr" disabled>
-        Copiar qrPayload
-      </button>
-    </div>
-    <button type="button" class="secondary" id="btn-clear-jwt">Olvidar JWT temporal</button>
-
-    <h2>Autofill (sesión temporal)</h2>
-    <p class="muted">
-      UUID de credencial en tu cuenta. Solo se rellena el <strong>usuario</strong> en
-      texto plano; la contraseña sigue cifrada en el servidor (sin clave de cofre en
-      la extensión).
+      Con <strong>sesión web</strong> solo <strong>autofill</strong> de usuario (mismo sitio que la URL de la credencial).
+      <strong>copy / reveal</strong> siguen requiriendo sesión temporal emparejada.
     </p>
     <label>
       <span>credentialId</span>
@@ -176,9 +165,9 @@
     <label>
       <span>Propósito</span>
       <select id="deliver-purpose">
-        <option value="autofill">autofill (directo si la política lo permite)</option>
-        <option value="copy">copy (suele pedir aprobación)</option>
-        <option value="reveal">reveal (suele pedir aprobación)</option>
+        <option value="autofill">autofill</option>
+        <option value="copy">copy (sesión temporal)</option>
+        <option value="reveal">reveal (sesión temporal)</option>
       </select>
     </label>
     <button type="button" id="btn-autofill">
@@ -189,8 +178,44 @@
     </button>
     <pre id="autofill-status"></pre>
 
-    <h2 style="margin-top: 1rem">Estado del emparejamiento</h2>
+    <h2 style="margin-top: 1rem">Estado del emparejamiento temporal</h2>
     <pre id="poll-status">Sin poll activo.</pre>
+
+    <details>
+      <summary>Sesión temporal (equipo ajeno / avanzado)</summary>
+      <p class="muted">
+        Empareja con el móvil; el poll guarda el JWT temporal. Útil cuando no quieres
+        sesión web completa en esta máquina.
+      </p>
+      <label>
+        <span>Nombre del cliente</span>
+        <input type="text" id="device-name" value="Passtore extension" />
+      </label>
+      <label>
+        <span>Origen permitido</span>
+        <input type="text" id="allowed-origin" placeholder="https://ejemplo.com" />
+      </label>
+      <label>
+        <span>Contexto</span>
+        <select id="context-type">
+          <option value="extension">extension</option>
+          <option value="browser">browser</option>
+          <option value="web">web</option>
+          <option value="autofill">autofill</option>
+          <option value="desktop">desktop</option>
+        </select>
+      </label>
+      <button type="button" id="btn-init-pairing">Iniciar emparejamiento</button>
+      <div class="row2">
+        <button type="button" class="secondary" id="btn-copy-deeplink" disabled>
+          Copiar deep link
+        </button>
+        <button type="button" class="secondary" id="btn-copy-qr" disabled>
+          Copiar qrPayload
+        </button>
+      </div>
+      <button type="button" class="secondary" id="btn-clear-jwt">Olvidar JWT temporal</button>
+    </details>
 
     <details>
       <summary>Bridge de prueba</summary>

@@ -90,18 +90,28 @@ function startDeliveryPoll(requestId) {
   }, 2500);
 }
 
-function updateJwtPill(tempJwtPresent) {
-  const el = document.getElementById('jwt-pill');
-  if (!el) return;
-  el.textContent = tempJwtPresent
-    ? 'JWT temporal: guardado (chrome.storage.session)'
-    : 'JWT temporal: no';
-  el.className = `pill ${tempJwtPresent ? 'ok' : 'warn'}`;
+function updateSessionPills(userJwtPresent, tempJwtPresent) {
+  const webEl = document.getElementById('pill-web');
+  const tempEl = document.getElementById('pill-temp');
+  if (webEl) {
+    webEl.textContent = userJwtPresent
+      ? 'Sesión web: conectada'
+      : 'Sesión web: no';
+    webEl.className = `pill ${userJwtPresent ? 'ok' : 'warn'}`;
+  }
+  if (tempEl) {
+    tempEl.textContent = tempJwtPresent
+      ? 'Sesión temporal: activa'
+      : 'Sesión temporal: no';
+    tempEl.className = `pill ${tempJwtPresent ? 'ok' : 'warn'}`;
+  }
 }
 
 function setCopyButtonsEnabled(enabled) {
-  document.getElementById('btn-copy-deeplink').disabled = !enabled;
-  document.getElementById('btn-copy-qr').disabled = !enabled;
+  const a = document.getElementById('btn-copy-deeplink');
+  const b = document.getElementById('btn-copy-qr');
+  if (a) a.disabled = !enabled;
+  if (b) b.disabled = !enabled;
 }
 
 async function copyText(text) {
@@ -121,7 +131,9 @@ async function loadState() {
   }
   const baseEl = document.getElementById('api-base-url');
   if (baseEl) baseEl.value = r.apiBaseUrl ?? '';
-  updateJwtPill(Boolean(r.tempJwtPresent));
+  const webEl = document.getElementById('web-app-url');
+  if (webEl) webEl.value = r.webAppUrl ?? '';
+  updateSessionPills(Boolean(r.userJwtPresent), Boolean(r.tempJwtPresent));
   if (r.lastPairing?.deepLink && r.lastPairing?.qrPayload) {
     copySnapshot = {
       deepLink: r.lastPairing.deepLink,
@@ -180,6 +192,48 @@ function startPoll(sessionId, pairingCode) {
 document.addEventListener('DOMContentLoaded', async () => {
   await fillAllowedOriginFromTab();
   await loadState();
+  const sync = await chrome.runtime.sendMessage({
+    type: 'AUTH_SYNC_JWT_FROM_WEB_TABS',
+  });
+  if (sync?.ok) {
+    await loadState();
+  }
+});
+
+document.getElementById('btn-save-web-app')?.addEventListener('click', async () => {
+  const raw = document.getElementById('web-app-url')?.value ?? '';
+  const r = await chrome.runtime.sendMessage({
+    type: 'AUTH_SET_WEB_APP_URL',
+    webAppUrl: raw,
+  });
+  setPollStatus(r.ok ? `App web: ${r.webAppUrl}` : `Error: ${r.error}`);
+  await loadState();
+});
+
+document.getElementById('btn-sync-web')?.addEventListener('click', async () => {
+  const r = await chrome.runtime.sendMessage({ type: 'AUTH_SYNC_JWT_FROM_WEB_TABS' });
+  if (!r.ok) {
+    setPollStatus(r.error ?? 'Error al sincronizar');
+    await loadState();
+    return;
+  }
+  setPollStatus('Token de la web guardado en la extensión.');
+  await loadState();
+});
+
+document.getElementById('btn-open-web-login')?.addEventListener('click', async () => {
+  const r = await chrome.runtime.sendMessage({ type: 'AUTH_OPEN_WEB_LOGIN' });
+  setPollStatus(
+    r.ok
+      ? 'Se abrió la pestaña de inicio de sesión. Tras entrar, pulsa «Sincronizar sesión desde la web».'
+      : `Error: ${r.error}`,
+  );
+});
+
+document.getElementById('btn-clear-user-jwt')?.addEventListener('click', async () => {
+  const r = await chrome.runtime.sendMessage({ type: 'AUTH_CLEAR_USER_JWT' });
+  setPollStatus(r.ok ? 'Sesión web en la extensión borrada.' : `Error: ${r.error}`);
+  await loadState();
 });
 
 document.getElementById('btn-save-api')?.addEventListener('click', async () => {
@@ -224,9 +278,7 @@ document.getElementById('btn-init-pairing')?.addEventListener('click', async () 
   const data = r.data;
   copySnapshot = { deepLink: data.deepLink, qrPayload: data.qrPayload };
   setCopyButtonsEnabled(true);
-  setPollStatus(
-    `Sesión ${data.sessionId.slice(0, 8)}… — poll hasta activo.`,
-  );
+  setPollStatus(`Sesión ${data.sessionId.slice(0, 8)}… — poll hasta activo.`);
   startPoll(data.sessionId, data.pairingCode);
 });
 
@@ -288,8 +340,14 @@ document.getElementById('btn-autofill')?.addEventListener('click', async () => {
     return;
   }
   if (r.filled) {
+    const mode =
+      r.authMode === 'web'
+        ? '[sesión web] '
+        : r.authMode === 'temporary'
+          ? '[temporal] '
+          : '';
     setAutofillStatus(
-      `${r.warn ? `${r.warn} ` : ''}Usuario rellenado · ${r.alias ?? '?'} (${r.platformName ?? '—'})`,
+      `${mode}${r.warn ? `${r.warn} ` : ''}Usuario rellenado · ${r.alias ?? '?'} (${r.platformName ?? '—'})`,
     );
     return;
   }

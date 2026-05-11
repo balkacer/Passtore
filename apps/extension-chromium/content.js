@@ -37,7 +37,19 @@ function findUsernameField() {
   return null;
 }
 
+const PASSTORE_WEB_JWT_KEY = 'passtore.jwt';
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message?.type === 'PASSTORE_READ_WEB_JWT') {
+    try {
+      const jwt = sessionStorage.getItem(PASSTORE_WEB_JWT_KEY);
+      sendResponse({ jwt: jwt && jwt.trim() ? jwt : null });
+    } catch {
+      sendResponse({ jwt: null });
+    }
+    return true;
+  }
+
   if (message?.type === 'PAGE_PING') {
     sendResponse({
       type: 'PAGE_PONG',

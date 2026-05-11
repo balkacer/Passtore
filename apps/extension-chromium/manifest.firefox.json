@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Passtore",
-  "version": "0.0.3",
-  "description": "Passtore — MV3; temporary auth + autofill de usuario vía /temporary-auth/deliver.",
+  "version": "0.0.4",
+  "description": "Passtore — MV3; sesión web o temporal + autofill de usuario.",
   "browser_specific_settings": {
     "gecko": {
       "id": "passtore@passtore.app",
@@ -16,7 +16,7 @@
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["activeTab", "storage"],
+  "permissions": ["activeTab", "storage", "tabs"],
   "host_permissions": [
     "http://localhost/*",
     "http://127.0.0.1/*",
