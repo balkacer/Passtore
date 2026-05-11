@@ -1,10 +1,16 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useRegisterMutation } from '@/api/passtoreApi';
 import { persistSession } from '@/lib/session';
 
 export function RegisterPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const fromExtension = searchParams.get('extension') === '1';
+  const postAuthPath = useMemo(
+    () => (fromExtension ? '/home?fromExtension=1' : '/home'),
+    [fromExtension],
+  );
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -19,7 +25,7 @@ export function RegisterPage() {
         password,
       }).unwrap();
       persistSession(res.accessToken, res.user);
-      navigate('/home', { replace: true });
+      navigate(postAuthPath, { replace: true });
     } catch {
       alert('No se pudo crear la cuenta.');
     }
@@ -28,6 +34,12 @@ export function RegisterPage() {
   return (
     <div className="page">
       <h1 className="heading-lg">Crear cuenta</h1>
+      {fromExtension ? (
+        <p className="muted" style={{ marginBottom: '1rem' }}>
+          Cuando termines, abre la extensión y pulsa{' '}
+          <strong>Sincronizar sesión desde la web</strong>.
+        </p>
+      ) : null}
       <form className="stack" onSubmit={onSubmit}>
         <input
           className="input"
@@ -60,7 +72,9 @@ export function RegisterPage() {
         </button>
       </form>
       <p className="muted" style={{ marginTop: '2rem', textAlign: 'center' }}>
-        <Link to="/login">¿Ya tienes cuenta? Inicia sesión</Link>
+        <Link to={fromExtension ? '/login?extension=1' : '/login'}>
+          ¿Ya tienes cuenta? Inicia sesión
+        </Link>
       </p>
     </div>
   );

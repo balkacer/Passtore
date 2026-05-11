@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { startAuthentication } from '@simplewebauthn/browser';
 import {
   useLoginMutation,
@@ -10,6 +10,12 @@ import { persistSession } from '@/lib/session';
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const fromExtension = searchParams.get('extension') === '1';
+  const postAuthPath = useMemo(
+    () => (fromExtension ? '/home?fromExtension=1' : '/home'),
+    [fromExtension],
+  );
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [pkUser, setPkUser] = useState('');
@@ -25,7 +31,7 @@ export function LoginPage() {
         password,
       }).unwrap();
       persistSession(res.accessToken, res.user);
-      navigate('/home', { replace: true });
+      navigate(postAuthPath, { replace: true });
     } catch {
       alert('No se pudo iniciar sesión.');
     }
@@ -47,7 +53,7 @@ export function LoginPage() {
         response: assertion as unknown as Record<string, unknown>,
       }).unwrap();
       persistSession(res.accessToken, res.user);
-      navigate('/home', { replace: true });
+      navigate(postAuthPath, { replace: true });
     } catch (e: unknown) {
       console.error(e);
       alert(
@@ -59,6 +65,12 @@ export function LoginPage() {
   return (
     <div className="page">
       <h1 className="heading-lg">Iniciar sesión</h1>
+      {fromExtension ? (
+        <p className="muted" style={{ marginBottom: '1rem' }}>
+          Tras entrar, vuelve a la extensión Passtore y pulsa{' '}
+          <strong>Sincronizar sesión desde la web</strong> (deja abierta esta pestaña).
+        </p>
+      ) : null}
 
       <p className="heading-lg" style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>
         Solo con passkey (usuario)
@@ -128,7 +140,9 @@ export function LoginPage() {
         Apple (web)
       </button>
       <p className="muted" style={{ marginTop: '2rem', textAlign: 'center' }}>
-        <Link to="/register">¿No tienes cuenta? Crear una</Link>
+        <Link to={fromExtension ? '/register?extension=1' : '/register'}>
+          ¿No tienes cuenta? Crear una
+        </Link>
       </p>
     </div>
   );
