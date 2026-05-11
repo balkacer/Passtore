@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useCredentialQuery, useDeleteCredentialMutation } from '@/api/passtoreApi';
 import { SecurityBadge } from '@/components/SecurityBadge';
+import { CredentialFavicon } from '@/components/CredentialFavicon';
+import { copyCredentialPassword } from '@/lib/credentialClipboard';
 import { decryptSensitive } from '@passtore/vault-crypto';
 import { getVaultKey } from '@/lib/webSecureStorage';
 import { scoreToSecurityIndicator } from '@/lib/passwordStrength';
@@ -41,14 +43,20 @@ export function CredentialDetailPage() {
   };
 
   const onCopy = async () => {
-    const plain = decryptPassword();
-    if (!plain) {
+    if (!data) {
       return;
     }
-    await navigator.clipboard.writeText(plain);
-    window.setTimeout(() => {
-      navigator.clipboard.writeText('').catch(() => {});
-    }, 45_000);
+    const r = await copyCredentialPassword(data);
+    if (!r.ok) {
+      if (r.reason === 'no_vault_key') {
+        alert('No hay clave de bóveda en este navegador.');
+      } else if (r.reason === 'decrypt_failed') {
+        alert('No se pudo descifrar.');
+      } else {
+        alert('No se pudo copiar al portapapeles.');
+      }
+      return;
+    }
     alert('Copiado. El portapapeles se limpiará en ~45s.');
   };
 
@@ -94,10 +102,26 @@ export function CredentialDetailPage() {
         <Link to="/home">← Inicio</Link>
       </p>
       <div className="card stack">
-        <h1 className="heading-lg" style={{ margin: 0 }}>
-          {data.alias}
-        </h1>
-        <div className="muted">{data.platformName}</div>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            flexWrap: 'wrap',
+          }}>
+          <CredentialFavicon
+            iconUrl={data.iconUrl}
+            url={data.url}
+            alias={data.alias}
+            size={56}
+          />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h1 className="heading-lg" style={{ margin: 0 }}>
+              {data.alias}
+            </h1>
+            <div className="muted">{data.platformName}</div>
+          </div>
+        </div>
         <div>{data.loginUsername}</div>
         {data.url ? (
           <a href={data.url} target="_blank" rel="noreferrer">
