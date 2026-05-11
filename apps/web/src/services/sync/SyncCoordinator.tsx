@@ -3,18 +3,17 @@ import { useAuthStore } from '@/store/authStore';
 import { getApiBaseUrl } from '@/lib/config';
 import { USE_SYNC_OUTBOX, USE_SYNC_SOCKET } from '@/config/featureFlags';
 import { connectSyncSocket, disconnectSyncSocket } from '@/services/sync/syncSocket';
-import { flushSyncOutbox } from '@/services/sync/syncOutboxWorker';
-import { pullAndApplyRemoteSync } from '@/services/sync/syncPullService';
+import { runFullVaultSync } from '@/services/sync/syncManualService';
 
 /**
- * Socket.IO + periodic flush/pull when local vault + sync outbox are enabled (dev).
+ * Socket.IO + flush/pull periódico cuando el cofre local y la cola de sync están activos.
  */
 export function SyncCoordinator() {
   const hydrated = useAuthStore((s) => s.hydrated);
   const token = useAuthStore((s) => s.accessToken);
 
   const runSync = useCallback(() => {
-    void flushSyncOutbox().then(() => pullAndApplyRemoteSync());
+    void runFullVaultSync();
   }, []);
 
   useEffect(() => {
@@ -31,7 +30,7 @@ export function SyncCoordinator() {
     if (!hydrated || !token || !USE_SYNC_OUTBOX) {
       return;
     }
-    void flushSyncOutbox();
+    void runSync();
     const onOnline = () => runSync();
     window.addEventListener('online', onOnline);
     const interval = setInterval(() => runSync(), 30000);
