@@ -24,7 +24,8 @@ Carga local: **Cargar descomprimida** sigue usando la **carpeta** del proyecto; 
 5. **Icono**: el manifest actual no incluye `icons`; añade PNG **128×128** (y 48 / 96 si quieres) antes del envío público.
 6. **Política de privacidad**: URL pública obligatoria si la extensión recoge datos del usuario o llama a tu API — enlaza a la política del producto Passtore.
 7. **Justificación de permisos** (campo “Permission justification”):
-   - **`storage`**: guardar URL base del API y JWT temporal de sesión limitada.
+   - **`storage`**: guardar URL base del API, URL de la app web, JWT de sesión web (`chrome.storage.local`) y JWT temporal (`chrome.storage.session`).
+   - **`tabs`**: localizar pestañas del origen de la app web para leer el JWT de `sessionStorage` vía el content script (sincronizar sesión con la extensión).
    - **`activeTab`**: interactuar con la pestaña activa para autofill y ping de prueba.
    - **`host_permissions` amplios (`https://*/*`)**: necesarios para que el service worker llame a tu backend en el dominio que el usuario configure y para inyectar el content script en sitios de login. Para reducir alcance en revisión, ver [Endurecer permisos](#endurecer-permisos-antes-de-producción).
 8. **Revisión**: tiempos variables; respuestas claras si piden aclaración sobre datos remotos (solo tu backend, sin terceros).

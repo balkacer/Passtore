@@ -41,17 +41,30 @@ Mismo código; el envoltorio es un proyecto **Xcode** generado en macOS. Guía y
 - **URL base** en el popup (por defecto `http://localhost:3000`). Rutas sin prefijo `/api`.
 - **CORS:** el backend admite orígenes `chrome-extension://…` además de `CORS_ORIGINS` (`backend/src/main.ts`).
 
-## Temporary auth (B2)
+## Sesión web en la extensión (recomendado)
 
-Pairing, poll, JWT en **`chrome.storage.session`**, copiar deep link / `qrPayload`.
+1. Configura **URL de la app web** (p. ej. `http://localhost:5173`) y **Base URL** del API.
+2. Si ya tienes Passtore abierto en una pestaña con sesión iniciada, al abrir el popup se intenta **sincronizar** el JWT desde `sessionStorage` (`passtore.jwt`) vía el content script. También puedes pulsar **Sincronizar sesión desde la web**.
+3. Si no hay sesión: **Iniciar sesión o registrarse en la web** abre `/login?extension=1`; tras entrar, vuelve a la extensión y sincroniza (deja la pestaña de Passtore abierta).
+4. **Autofill** con propósito `autofill` → `POST /temporary-auth/extension-autofill` con el JWT de usuario. El **origen de la pestaña activa** debe coincidir (reglas de host) con la **URL guardada en la credencial**, si existe.
+5. **copy / reveal** siguen usando **sesión temporal** emparejada → `POST /temporary-auth/deliver`.
+
+El **content script** responde a `PASSTORE_READ_WEB_JWT` solo en páginas donde esté inyectado; el permiso **`tabs`** permite buscar pestañas del mismo origen que la app web.
+
+## Temporary auth (B2) — equipo ajeno / avanzado
+
+La **sesión temporal** en producto está pensada sobre todo para **navegador en equipo ajeno** o **app de escritorio puntual**: entras, sacas una credencial con el móvil como aprobador, sales. No es el flujo ideal para “instalar la extensión solo para copiar una contraseña y desinstalar”.
+
+En el popup, el bloque **Sesión temporal** está en el desplegable *avanzado*. El JWT temporal sigue en **`chrome.storage.session`**.
 
 ## Autofill (B3)
 
-1. Completa el flujo de sesión temporal (JWT presente en la pastilla del popup).
-2. Abre la pestaña del **login** (mismo **origen** que configuraste al emparejar).
-3. Indica el **UUID** de la credencial y el **propósito** (`autofill` suele ser directo si la política lo permite; `copy` / `reveal` suelen pedir aprobación en el móvil).
-4. **Rellenar usuario en la pestaña actual** → `POST /temporary-auth/deliver` con el JWT temporal; si hace falta aprobación, copia el enlace y el popup hace **poll** hasta que la entrega esté `ready`.
-5. El **content script** escribe solo **`loginUsername`** (texto plano). La contraseña sigue cifrada en el servidor; sin clave de cofre en la extensión no se descifra ni se rellena el campo password.
+1. **Preferido:** JWT de sesión web guardado en la extensión (`chrome.storage.local`) — ver sección anterior.
+2. **Alternativa:** JWT temporal (emparejamiento + poll).
+3. Abre la pestaña del **login** del sitio donde quieres autofill.
+4. Indica el **UUID** de la credencial y el **propósito** (`autofill` con sesión web; `copy` / `reveal` con temporal).
+5. **Rellenar usuario** → el background llama a `extension-autofill` o `/temporary-auth/deliver`; si hace falta aprobación (solo temporal con copy/reveal), el popup hace **poll**.
+6. El **content script** escribe solo **`loginUsername`**. La contraseña sigue cifrada en el servidor.
 
 Si no se rellena, recarga la página tras instalar o actualizar la extensión (para inyectar el content script).
 

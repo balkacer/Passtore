@@ -13,6 +13,7 @@ Contrato compartido entre la app web, el futuro *content script* y el *backgroun
 |--------|-----------|-----|
 | `REQUEST_FILL` | extensión → app | Pedir rellenar con `credentialId` (y opcionalmente `frameOrigin` para comprobar el origen). |
 | `PASSTORE_AUTOFILL` | background → content script | Rellenar **usuario** en el DOM (`loginUsername` en claro tras `/temporary-auth/deliver`). Implementado en `apps/extension-chromium/content.js`. |
+| `PASSTORE_READ_WEB_JWT` | background → content script (pestaña Passtore) | Lee `sessionStorage['passtore.jwt']` y responde `{ jwt }` para enlazar la sesión web con la extensión. |
 | `UNLOCK_SESSION` | extensión → app | Indicar que el usuario debe desbloquear el vault en la app (no enviar claves en claro). |
 | `PING` / `PONG` | ambas | *Health check* con `nonce` correlacionado. |
 
