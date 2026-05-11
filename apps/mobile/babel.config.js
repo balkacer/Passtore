@@ -11,5 +11,15 @@ module.exports = {
         },
       },
     ],
+    [
+      'transform-inline-environment-variables',
+      {
+        include: [
+          'PASSTORE_USE_LOCAL_VAULT',
+          'PASSTORE_USE_SYNC_OUTBOX',
+          'PASSTORE_USE_SYNC_SOCKET',
+        ],
+      },
+    ],
   ],
 };

@@ -77,6 +77,25 @@ When you want to forcefully reload, for example to reset the state of your app, 
 
 You've successfully run and modified your React Native App. :partying_face:
 
+## Passtore — cofre local en release (opcional)
+
+En **desarrollo** el cofre local + sync (`/sync/events`) está activo. En **release**, por defecto las credenciales siguen el flujo clásico vía API salvo que inyectes flags al compilar (Babel + `babel-plugin-transform-inline-environment-variables`):
+
+| Variable | Uso |
+|----------|-----|
+| `PASSTORE_USE_LOCAL_VAULT=true` | Credenciales en SQLite + cola de sync (sin CRUD directo a `GET/POST /credentials`) |
+| `PASSTORE_USE_SYNC_OUTBOX=false` | Desactiva la cola de subida |
+| `PASSTORE_USE_SYNC_SOCKET=false` | Sin Socket.IO (sigue el intervalo y el botón **Sincronizar** en inicio) |
+
+Ejemplo en PowerShell antes de compilar Android:
+
+```powershell
+$env:PASSTORE_USE_LOCAL_VAULT = 'true'
+cd android; .\gradlew assembleRelease
+```
+
+Cuentas con datos solo en la tabla `credentials` del servidor necesitan migración; ver `docs/ARCHITECTURE.md`.
+
 ### Now what?
 
 - If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).

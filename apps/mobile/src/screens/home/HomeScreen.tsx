@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -22,6 +23,8 @@ import {
   mapCreateResultToApi,
   toPasskeyCreateRequest,
 } from '@/services/passkeys/mapNativePasskey';
+import { USE_LOCAL_VAULT, USE_SYNC_OUTBOX } from '@/config/featureFlags';
+import { runFullVaultSync } from '@/services/sync/syncManualService';
 
 type Nav = NativeStackNavigationProp<MainStackParamList, 'Home'>;
 
@@ -32,6 +35,7 @@ export function HomeScreen() {
   const { data, refetch, isFetching } = useCredentialsQuery();
   const [regOpt, { isLoading: pkRegOpt }] = usePasskeyRegisterOptionsMutation();
   const [regVer, { isLoading: pkRegVer }] = usePasskeyRegisterVerifyMutation();
+  const [syncBusy, setSyncBusy] = useState(false);
 
   const registerPasskey = async () => {
     if (!Passkey.isSupported()) {
@@ -52,6 +56,18 @@ export function HomeScreen() {
         'No se pudo registrar. Revisa RP_ID / URL del servidor en README.',
       );
     }
+  };
+
+  const onVaultSync = async () => {
+    setSyncBusy(true);
+    const r = await runFullVaultSync();
+    setSyncBusy(false);
+    if (!r.ok) {
+      Alert.alert('Sincronizar', r.message);
+      return;
+    }
+    Alert.alert('Listo', 'Cofre sincronizado.');
+    void refetch();
   };
 
   const recent = (data ?? []).slice(0, 12);
@@ -89,6 +105,14 @@ export function HomeScreen() {
           <Pressable onPress={registerPasskey} hitSlop={8} disabled={pkRegOpt || pkRegVer}>
             <Text style={styles.pkBtn}>＋Passkey</Text>
           </Pressable>
+          {USE_LOCAL_VAULT && USE_SYNC_OUTBOX ? (
+            <Pressable
+              onPress={() => void onVaultSync()}
+              hitSlop={8}
+              disabled={syncBusy}>
+              <Text style={styles.pkBtn}>{syncBusy ? '…' : 'Sincronizar'}</Text>
+            </Pressable>
+          ) : null}
           <Pressable onPress={() => navigation.navigate('SecurityTempAuth')} hitSlop={8}>
             <Text style={styles.pkBtn}>Seguridad</Text>
           </Pressable>

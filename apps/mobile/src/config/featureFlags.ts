@@ -1,11 +1,21 @@
 /**
- * Feature flags — toggles while migrating to local-first vault + sync.
+ * Feature flags — cofre local + sync.
  *
- * `USE_LOCAL_VAULT`: credentials CRUD uses SQLite on-device (`VaultRepository`)
- * instead of `GET/POST /credentials`. Auth, profile, passkeys still hit the API.
- *
- * `USE_SYNC_OUTBOX` / `USE_SYNC_SOCKET`: push queue + Socket.IO hints + pull apply (Phase 3).
+ * En `__DEV__` todo va activo. En release, exporta variables de entorno **antes del bundle**:
+ * `PASSTORE_USE_LOCAL_VAULT=true` (y opcionalmente `PASSTORE_USE_SYNC_OUTBOX`, `PASSTORE_USE_SYNC_SOCKET`).
+ * Babel las inserta en tiempo de compilación (`babel-plugin-transform-inline-environment-variables`).
  */
-export const USE_LOCAL_VAULT = __DEV__;
-export const USE_SYNC_OUTBOX = __DEV__ && USE_LOCAL_VAULT;
-export const USE_SYNC_SOCKET = __DEV__ && USE_LOCAL_VAULT;
+export const USE_LOCAL_VAULT =
+  __DEV__ || process.env.PASSTORE_USE_LOCAL_VAULT === 'true';
+
+export const USE_SYNC_OUTBOX =
+  USE_LOCAL_VAULT &&
+  (__DEV__ ||
+    (process.env.PASSTORE_USE_SYNC_OUTBOX !== 'false' &&
+      process.env.PASSTORE_USE_SYNC_OUTBOX !== '0'));
+
+export const USE_SYNC_SOCKET =
+  USE_LOCAL_VAULT &&
+  (__DEV__ ||
+    (process.env.PASSTORE_USE_SYNC_SOCKET !== 'false' &&
+      process.env.PASSTORE_USE_SYNC_SOCKET !== '0'));
