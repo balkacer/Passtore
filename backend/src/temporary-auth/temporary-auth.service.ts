@@ -564,4 +564,46 @@ export class TemporaryAuthService {
       take: 200,
     });
   }
+
+  /**
+   * Autofill de usuario con JWT de sesión web (extensión con cuenta normal).
+   * Solo propósito autofill; el origen debe ser compatible con la URL de la credencial si existe.
+   */
+  async extensionAutofillDeliver(
+    userId: string,
+    dto: { credentialId: string; requestedOrigin: string },
+  ) {
+    const ro = this.normalizeOrigin(dto.requestedOrigin);
+    const credential = await this.credentialsService.findOneForUser(
+      dto.credentialId,
+      userId,
+    );
+    if (credential.url?.trim()) {
+      const co = this.normalizeOrigin(credential.url);
+      if (!this.originsCompatible(co, ro)) {
+        throw new ForbiddenException(
+          'El sitio actual no coincide con la URL guardada en la credencial',
+        );
+      }
+    }
+    const perm = this.defaultPermissions();
+    if (!this.purposeAllowed(perm, TemporaryCredentialRequestPurpose.AUTOFILL)) {
+      throw new ForbiddenException('Autofill not permitted');
+    }
+    if (this.needsBiometricGate(perm, TemporaryCredentialRequestPurpose.AUTOFILL)) {
+      throw new BadRequestException('Unexpected biometric gate for autofill');
+    }
+    return {
+      needsApproval: false,
+      credential: {
+        id: credential.id,
+        alias: credential.alias,
+        platformName: credential.platformName,
+        url: credential.url,
+        loginUsername: credential.loginUsername,
+        encryptedPassword: credential.encryptedPassword,
+        notesEncrypted: credential.notesEncrypted,
+      },
+    };
+  }
 }

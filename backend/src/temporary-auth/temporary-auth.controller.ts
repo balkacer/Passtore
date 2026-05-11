@@ -17,6 +17,7 @@ import { TemporaryAuthService } from './temporary-auth.service';
 import { InitPairingDto } from './dto/init-pairing.dto';
 import { ApprovePairingDto } from './dto/approve-pairing.dto';
 import { DeliveryRequestDto } from './dto/delivery-request.dto';
+import { ExtensionAutofillDto } from './dto/extension-autofill.dto';
 import { TemporaryAuthSession } from './temporary-auth-session.entity';
 
 type AuthedUser = { userId: string };
@@ -84,6 +85,15 @@ export class TemporaryAuthController {
     @Param('sessionId') sessionId: string,
   ) {
     return this.service.listAudit(sessionId, req.user.userId);
+  }
+
+  @Post('extension-autofill')
+  @UseGuards(JwtAuthGuard)
+  extensionAutofill(
+    @Req() req: { user: AuthedUser },
+    @Body() dto: ExtensionAutofillDto,
+  ) {
+    return this.service.extensionAutofillDeliver(req.user.userId, dto);
   }
 
   @Post('deliver')
